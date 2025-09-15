@@ -105,14 +105,8 @@ document.addEventListener('DOMContentLoaded', () => {
             finalResultDiv.textContent = `คำตอบโดยประมาณคือ ${mid.toFixed(6)} (หลังจาก ${iteration + 1} รอบ)`;
             
             // **ส่วนที่เพิ่มเข้ามา: ซูมไปที่บริเวณคำตอบโดยอัตโนมัติ**
-            const zoomAmount = 0.5; // ปรับค่านี้เพื่อควบคุมระดับการซูม (ยิ่งน้อยยิ่งซูมมาก)
-            const zoomXMin = mid - zoomAmount;
-            const zoomXMax = mid + zoomAmount;
-            const zoomYMin = fMid - zoomAmount;
-            const zoomYMax = fMid + zoomAmount;
-            
-            functionChart.zoomScale('x', { min: zoomXMin, max: zoomXMax });
-            functionChart.zoomScale('y', { min: zoomYMin, max: zoomYMax });
+            functionChart.zoom({ x: mid, y: fMid }, 'y');
+            functionChart.zoom(1.5, { x: mid, y: fMid });
 
         } else {
             finalResultDiv.textContent = `ไม่พบคำตอบที่อยู่ในเกณฑ์ความคลาดเคลื่อนภายใน ${maxIterations} รอบ. คำตอบที่ใกล้เคียงที่สุดคือ ${mid.toFixed(6)}`;
@@ -203,14 +197,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // เพิ่ม Event Listener สำหรับปุ่มควบคุม
     zoomInBtn.addEventListener('click', () => {
-        functionChart.zoom(1.2); // ซูมเข้า 20%
+        // **ส่วนที่ปรับปรุง: ซูมไปที่จุดสุดท้ายเมื่อกดปุ่ม '+'**
+        const lastPoint = functionChart.data.datasets[1].data.slice(-1)[0];
+        if (lastPoint) {
+            functionChart.zoom(1.2, { x: lastPoint.x, y: lastPoint.y });
+        } else {
+            functionChart.zoom(1.2);
+        }
     });
 
     zoomOutBtn.addEventListener('click', () => {
-        functionChart.zoom(0.8); // ซูมออก 20%
+        functionChart.zoom(0.8);
     });
 
     resetZoomBtn.addEventListener('click', () => {
-        functionChart.resetZoom(); // รีเซ็ตการซูม
+        functionChart.resetZoom();
     });
 });
