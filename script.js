@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const calculateBtn = document.getElementById('calculateBtn');
     const functionInput = document.getElementById('functionInput');
     const aInput = document.getElementById('aInput');
-    const bInput = document = document.getElementById('bInput');
+    const bInput = document.getElementById('bInput');
     const maxIterationsInput = document.getElementById('maxIterations');
     const toleranceInput = document.getElementById('tolerance');
     const resultTableBody = document.getElementById('resultTableBody');
@@ -50,14 +50,12 @@ document.addEventListener('DOMContentLoaded', () => {
         outputSection.style.display = 'block';
         graphSection.style.display = 'block';
 
-        // ชุดข้อมูลสำหรับแสดงจุดในแต่ละ Iteration
         const iterationPoints = [];
         
         let mid;
         let fMid;
         let iteration = 0;
         
-        // กำหนดขอบเขตของกราฟ
         let minX = Math.min(a, b);
         let maxX = Math.max(a, b);
         let minY = Math.min(fa, fb, 0);
@@ -81,7 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 iteration: iteration + 1
             });
             
-            // อัปเดตขอบเขตของกราฟตามค่า f(mid) ที่ได้
             minY = Math.min(minY, fMid);
             maxY = Math.max(maxY, fMid);
 
@@ -98,7 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
             iteration++;
         }
         
-        // สร้างกราฟหลังจากได้ข้อมูลทั้งหมด
         createGraph(funcString, minX, maxX, minY, maxY, iterationPoints);
 
         if (Math.abs(fMid) < tolerance) {
@@ -108,7 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ปรับปรุงฟังก์ชัน createGraph ให้รับค่า min/max จากการคำนวณ
     function createGraph(funcString, minX, maxX, minY, maxY, iterationPoints) {
         const ctx = document.getElementById('functionChart').getContext('2d');
         const dataPoints = [];
@@ -181,6 +176,21 @@ document.addEventListener('DOMContentLoaded', () => {
                                 }
                                 return context.dataset.label + ': ' + context.formattedValue;
                             }
+                        }
+                    },
+                    zoom: {
+                        zoom: {
+                            wheel: {
+                                enabled: true,
+                            },
+                            pinch: {
+                                enabled: true
+                            },
+                            mode: 'xy',
+                        },
+                        pan: {
+                            enabled: true,
+                            mode: 'xy',
                         }
                     }
                 }
