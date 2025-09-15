@@ -9,6 +9,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const outputSection = document.querySelector('.output-section');
     const finalResultDiv = document.getElementById('final-result');
     const graphSection = document.querySelector('.graph-section');
+    
+    // อ้างอิงปุ่มที่เพิ่มเข้ามา
+    const zoomInBtn = document.getElementById('zoomInBtn');
+    const zoomOutBtn = document.getElementById('zoomOutBtn');
+    const resetZoomBtn = document.getElementById('resetZoomBtn');
 
     let functionChart;
 
@@ -178,23 +183,29 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         }
                     },
+                    // ปิดการซูมด้วยเมาส์
                     zoom: {
                         zoom: {
-                            wheel: {
-                                enabled: true,
-                            },
-                            pinch: {
-                                enabled: true
-                            },
-                            mode: 'xy',
+                            wheel: { enabled: false },
+                            pinch: { enabled: false }
                         },
-                        pan: {
-                            enabled: true,
-                            mode: 'xy',
-                        }
+                        pan: { enabled: false }
                     }
                 }
             }
         });
     }
+
+    // เพิ่ม Event Listener สำหรับปุ่มควบคุม
+    zoomInBtn.addEventListener('click', () => {
+        functionChart.zoom(1.2); // ซูมเข้า 20%
+    });
+
+    zoomOutBtn.addEventListener('click', () => {
+        functionChart.zoom(0.8); // ซูมออก 20%
+    });
+
+    resetZoomBtn.addEventListener('click', () => {
+        functionChart.resetZoom(); // รีเซ็ตการซูม
+    });
 });
