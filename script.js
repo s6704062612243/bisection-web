@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const finalResultDiv = document.getElementById('final-result');
     const graphSection = document.querySelector('.graph-section');
     
-    // อ้างอิงปุ่มที่เพิ่มเข้ามา
     const zoomInBtn = document.getElementById('zoomInBtn');
     const zoomOutBtn = document.getElementById('zoomOutBtn');
     const resetZoomBtn = document.getElementById('resetZoomBtn');
@@ -104,6 +103,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (Math.abs(fMid) < tolerance) {
             finalResultDiv.textContent = `คำตอบโดยประมาณคือ ${mid.toFixed(6)} (หลังจาก ${iteration + 1} รอบ)`;
+            
+            // **ส่วนที่เพิ่มเข้ามา: ซูมไปที่บริเวณคำตอบโดยอัตโนมัติ**
+            const zoomAmount = 0.5; // ปรับค่านี้เพื่อควบคุมระดับการซูม (ยิ่งน้อยยิ่งซูมมาก)
+            const zoomXMin = mid - zoomAmount;
+            const zoomXMax = mid + zoomAmount;
+            const zoomYMin = fMid - zoomAmount;
+            const zoomYMax = fMid + zoomAmount;
+            
+            functionChart.zoomScale('x', { min: zoomXMin, max: zoomXMax });
+            functionChart.zoomScale('y', { min: zoomYMin, max: zoomYMax });
+
         } else {
             finalResultDiv.textContent = `ไม่พบคำตอบที่อยู่ในเกณฑ์ความคลาดเคลื่อนภายใน ${maxIterations} รอบ. คำตอบที่ใกล้เคียงที่สุดคือ ${mid.toFixed(6)}`;
         }
@@ -158,17 +168,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         title: {
                             display: true,
                             text: 'x'
-                        },
-                        min: minX,
-                        max: maxX
+                        }
                     },
                     y: {
                         title: {
                             display: true,
                             text: 'f(x)'
-                        },
-                        min: minY,
-                        max: maxY
+                        }
                     }
                 },
                 plugins: {
@@ -183,7 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         }
                     },
-                    // ปิดการซูมด้วยเมาส์
                     zoom: {
                         zoom: {
                             wheel: { enabled: false },
