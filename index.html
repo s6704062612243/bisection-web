@@ -1,41 +1,75 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>Bisection Method</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bisection Method</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Bisection Method</h1>
+    <div class="container">
+        <h1>Bisection Method</h1>
+        
+        <div class="input-section">
+            <div class="form-group">
+                <label for="functionInput">สมการ (เช่น x**2 - 4):</label>
+                <input type="text" id="functionInput" value="x**2 - 4">
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="aInput">ค่า a:</label>
+                    <input type="number" id="aInput" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="bInput">ค่า b:</label>
+                    <input type="number" id="bInput" value="5">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="maxIterations">จำนวนรอบสูงสุด (Iteration):</label>
+                    <input type="number" id="maxIterations" value="20">
+                </div>
+                <div class="form-group">
+                    <label for="tolerance">ค่าความคลาดเคลื่อน (Tolerance):</label>
+                    <input type="number" id="tolerance" step="0.0001" value="0.0001">
+                </div>
+            </div>
+            
+            <button id="calculateBtn">คำนวณ</button>
+        </div>
 
-  <form id="bisectionForm">
-    <label>สมการ (ใช้ x เป็นตัวแปร):</label>
-    <input type="text" id="equation" value="x*x - 4">
+        <div class="output-section" style="display: none;">
+            <h2>ผลลัพธ์ Iteration</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>รอบ</th>
+                            <th>mid</th>
+                            <th>f(mid)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultTableBody">
+                    </tbody>
+                </table>
+            </div>
 
-    <label>ค่า a:</label>
-    <input type="number" id="a" value="0">
+            <div id="final-result" class="final-result-box"></div>
+        </div>
 
-    <label>ค่า b:</label>
-    <input type="number" id="b" value="5">
-
-    <label>จำนวนรอบสูงสุด (iteration):</label>
-    <input type="number" id="maxIter" value="20">
-
-    <label>ค่าความคลาดเคลื่อน (tolerance):</label>
-    <input type="text" id="tolerance" value="0.000001">
+        <div class="graph-section" style="display: none;">
+            <h2>กราฟฟังก์ชัน f(x)</h2>
+            <div class="chart-container">
+                <canvas id="functionChart"></canvas>
+            </div>
+        </div>
+        
+    </div>
     
-    <button type="submit">คำนวณ</button>
-  </form>
-
-    <div id="result"></div>
-    <canvas id="bisectionChart" width="400" height="200"></canvas>
-
-  <script src="script.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
-
-
-
-
-
