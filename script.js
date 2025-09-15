@@ -1,108 +1,179 @@
-function evaluateEquation(expr, x) {
-  return Function("x", "return " + expr)(x);
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const calculateBtn = document.getElementById('calculateBtn');
+    const functionInput = document.getElementById('functionInput');
+    const aInput = document.getElementById('aInput');
+    const bInput = document.getElementById('bInput');
+    const maxIterationsInput = document.getElementById('maxIterations');
+    const toleranceInput = document.getElementById('tolerance');
+    const resultTableBody = document.getElementById('resultTableBody');
+    const outputSection = document.querySelector('.output-section');
+    const finalResultDiv = document.getElementById('final-result');
+    const graphSection = document.querySelector('.graph-section');
 
-document.getElementById("bisectionForm").addEventListener("submit", function(e) {
-  e.preventDefault();
+    let functionChart;
 
-  const equation = document.getElementById("equation").value;
-  let a = parseFloat(document.getElementById("a").value);
-  let b = parseFloat(document.getElementById("b").value);
-  const maxIter = parseInt(document.getElementById("maxIter").value);
-  const tol = parseFloat(document.getElementById("tolerance").value);
-
-  let result = "<h2>ผลการคำนวณ</h2>";
-  let fa = evaluateEquation(equation, a);
-  let fb = evaluateEquation(equation, b);
-
-  if (fa * fb > 0) {
-    result += "<p>f(a) และ f(b) ต้องมีเครื่องหมายต่างกัน</p>";
-    document.getElementById("result").innerHTML = result;
-    return;
-  }
-
-  let mid, fmid;
-
-  // เตรียมข้อมูลสำหรับกราฟ
-  let labels = [];
-  let mids = [];
-  let fvals = [];
-
-  for (let i = 1; i <= maxIter; i++) {
-    mid = (a + b) / 2;
-    fmid = evaluateEquation(equation, mid);
-
-    result += `<p>รอบ ${i}: mid = ${mid.toFixed(6)}, f(mid) = ${fmid.toFixed(6)}</p>`;
-
-    labels.push("รอบ " + i);
-    mids.push(mid);
-    fvals.push(fmid);
-
-    if (Math.abs(fmid) < tol) {
-      result += `<p><b>คำตอบประมาณ = ${mid.toFixed(6)}</b></p>`;
-      break;
-    }
-
-    if (fa * fmid < 0) {
-      b = mid;
-      fb = fmid;
-    } else {
-      a = mid;
-      fa = fmid;
-    }
-
-    if (i === maxIter) {
-      result += `<p><b>ถึงจำนวนรอบสูงสุดแล้ว: คำตอบประมาณ = ${mid.toFixed(6)}</b></p>`;
-    }
-  }
-
-  document.getElementById("result").innerHTML = result;
-
-  // วาดกราฟ
-  const ctx = document.getElementById("bisectionChart").getContext("2d");
-
-  // ลบกราฟเก่า (ถ้ามี)
-  if (window.bisectionChart) {
-    window.bisectionChart.destroy();
-  }
-
-  window.bisectionChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: "ค่า mid",
-          data: mids,
-          borderColor: "blue",
-          fill: false,
-          yAxisID: 'y',
-        },
-        {
-          label: "ค่า f(mid)",
-          data: fvals,
-          borderColor: "red",
-          fill: false,
-          yAxisID: 'y1',
+    function evaluateFunction(funcString, x) {
+        try {
+            const f = new Function('x', 'return ' + funcString);
+            return f(x);
+        } catch (error) {
+            console.error("Invalid function expression:", error);
+            return NaN;
         }
-      ]
-    },
-    options: {
-      responsive: true,
-      interaction: { mode: "index", intersect: false },
-      scales: {
-        y: {
-          type: 'linear',
-          position: 'left',
-          title: { display: true, text: 'mid' }
-        },
-        y1: {
-          type: 'linear',
-          position: 'right',
-          title: { display: true, text: 'f(mid)' },
-          grid: { drawOnChartArea: false }
-        }
-      }
     }
-  });
+
+    function createGraph(funcString, a, b) {
+        const ctx = document.getElementById('functionChart').getContext('2d');
+        const dataPoints = [];
+        const numPoints = 100;
+        const step = (b - a) / numPoints;
+
+        for (let i = 0; i <= numPoints; i++) {
+            const x = a + i * step;
+            const y = evaluateFunction(funcString, x);
+            dataPoints.push({ x: x, y: y });
+        }
+
+        if (functionChart) {
+            functionChart.destroy();
+        }
+
+        functionChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: `f(x) = ${funcString}`,
+                    data: dataPoints,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1,
+                    fill: false,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: {
+                            display: true,
+                            text: 'x'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'f(x)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    calculateBtn.addEventListener('click', () => {
+        const funcString = functionInput.value;
+        let a = parseFloat(aInput.value);
+        let b = parseFloat(bInput.value);
+        const maxIterations = parseInt(maxIterationsInput.value);
+        const tolerance = parseFloat(toleranceInput.value);
+
+        resultTableBody.innerHTML = '';
+        finalResultDiv.textContent = '';
+        outputSection.style.display = 'none';
+        graphSection.style.display = 'none';
+
+        if (isNaN(a) || isNaN(b) || isNaN(maxIterations) || isNaN(tolerance)) {
+            alert('โปรดป้อนข้อมูลให้ครบถ้วนและเป็นตัวเลขที่ถูกต้อง');
+            return;
+        }
+
+        const fa = evaluateFunction(funcString, a);
+        const fb = evaluateFunction(funcString, b);
+
+        if (fa * fb >= 0) {
+            alert('ค่า f(a) และ f(b) มีเครื่องหมายเดียวกัน ไม่สามารถใช้วิธี Bisection ได้');
+            return;
+        }
+
+        outputSection.style.display = 'block';
+        graphSection.style.display = 'block';
+        
+        createGraph(funcString, a, b);
+        
+        // ชุดข้อมูลสำหรับแสดงจุดในแต่ละ Iteration
+        const iterationPoints = [];
+        
+        let mid;
+        let fMid;
+        let iteration = 0;
+
+        while (iteration < maxIterations) {
+            mid = (a + b) / 2;
+            fMid = evaluateFunction(funcString, mid);
+
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${iteration + 1}</td>
+                <td>${mid.toFixed(6)}</td>
+                <td>${fMid.toFixed(6)}</td>
+            `;
+            resultTableBody.appendChild(newRow);
+
+            // เพิ่มข้อมูลจุดลงใน array พร้อมหมายเลข Iteration
+            iterationPoints.push({ 
+                x: mid, 
+                y: fMid,
+                iteration: iteration + 1
+            });
+
+            if (Math.abs(fMid) < tolerance) {
+                break;
+            }
+
+            if (evaluateFunction(funcString, a) * fMid < 0) {
+                b = mid;
+            } else {
+                a = mid;
+            }
+
+            iteration++;
+        }
+
+        // เพิ่ม dataset ใหม่สำหรับจุด Iteration ลงในกราฟ
+        functionChart.data.datasets.push({
+            label: 'จุด Iteration',
+            data: iterationPoints,
+            backgroundColor: 'rgba(255, 99, 132, 0.8)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            pointRadius: 5,
+            pointHoverRadius: 8,
+            showLine: false
+        });
+        
+        // กำหนด Tooltip เพื่อแสดงหมายเลข Iteration
+        functionChart.options.plugins = {
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const point = context.raw;
+                        if (point.iteration) {
+                            return `Iteration: ${point.iteration}, f(x) = ${point.y.toFixed(6)}`;
+                        }
+                        return context.dataset.label + ': ' + context.formattedValue;
+                    }
+                }
+            }
+        };
+
+        functionChart.update();
+
+        if (Math.abs(fMid) < tolerance) {
+            finalResultDiv.textContent = `คำตอบโดยประมาณคือ ${mid.toFixed(6)} (หลังจาก ${iteration + 1} รอบ)`;
+        } else {
+            finalResultDiv.textContent = `ไม่พบคำตอบที่อยู่ในเกณฑ์ความคลาดเคลื่อนภายใน ${maxIterations} รอบ. คำตอบที่ใกล้เคียงที่สุดคือ ${mid.toFixed(6)}`;
+        }
+    });
 });
