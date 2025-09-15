@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const calculateBtn = document.getElementById('calculateBtn');
     const functionInput = document.getElementById('functionInput');
     const aInput = document.getElementById('aInput');
-    const bInput = document.getElementById('bInput');
+    const bInput = document = document.getElementById('bInput');
     const maxIterationsInput = document.getElementById('maxIterations');
     const toleranceInput = document.getElementById('tolerance');
     const resultTableBody = document.getElementById('resultTableBody');
@@ -20,57 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Invalid function expression:", error);
             return NaN;
         }
-    }
-
-    function createGraph(funcString, a, b) {
-        const ctx = document.getElementById('functionChart').getContext('2d');
-        const dataPoints = [];
-        const numPoints = 100;
-        const step = (b - a) / numPoints;
-
-        for (let i = 0; i <= numPoints; i++) {
-            const x = a + i * step;
-            const y = evaluateFunction(funcString, x);
-            dataPoints.push({ x: x, y: y });
-        }
-
-        if (functionChart) {
-            functionChart.destroy();
-        }
-
-        functionChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                datasets: [{
-                    label: `f(x) = ${funcString}`,
-                    data: dataPoints,
-                    borderColor: 'rgb(75, 192, 192)',
-                    tension: 0.1,
-                    fill: false,
-                    pointRadius: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        type: 'linear',
-                        position: 'bottom',
-                        title: {
-                            display: true,
-                            text: 'x'
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'f(x)'
-                        }
-                    }
-                }
-            }
-        });
     }
 
     calculateBtn.addEventListener('click', () => {
@@ -100,15 +49,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         outputSection.style.display = 'block';
         graphSection.style.display = 'block';
-        
-        createGraph(funcString, a, b);
-        
+
         // ชุดข้อมูลสำหรับแสดงจุดในแต่ละ Iteration
         const iterationPoints = [];
         
         let mid;
         let fMid;
         let iteration = 0;
+        
+        // กำหนดขอบเขตของกราฟ
+        let minX = Math.min(a, b);
+        let maxX = Math.max(a, b);
+        let minY = Math.min(fa, fb, 0);
+        let maxY = Math.max(fa, fb, 0);
 
         while (iteration < maxIterations) {
             mid = (a + b) / 2;
@@ -122,12 +75,15 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             resultTableBody.appendChild(newRow);
 
-            // เพิ่มข้อมูลจุดลงใน array พร้อมหมายเลข Iteration
-            iterationPoints.push({ 
-                x: mid, 
+            iterationPoints.push({
+                x: mid,
                 y: fMid,
                 iteration: iteration + 1
             });
+            
+            // อัปเดตขอบเขตของกราฟตามค่า f(mid) ที่ได้
+            minY = Math.min(minY, fMid);
+            maxY = Math.max(maxY, fMid);
 
             if (Math.abs(fMid) < tolerance) {
                 break;
@@ -141,34 +97,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             iteration++;
         }
-
-        // เพิ่ม dataset ใหม่สำหรับจุด Iteration ลงในกราฟ
-        functionChart.data.datasets.push({
-            label: 'จุด Iteration',
-            data: iterationPoints,
-            backgroundColor: 'rgba(255, 99, 132, 0.8)',
-            borderColor: 'rgba(255, 99, 132, 1)',
-            pointRadius: 5,
-            pointHoverRadius: 8,
-            showLine: false
-        });
         
-        // กำหนด Tooltip เพื่อแสดงหมายเลข Iteration
-        functionChart.options.plugins = {
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        const point = context.raw;
-                        if (point.iteration) {
-                            return `Iteration: ${point.iteration}, f(x) = ${point.y.toFixed(6)}`;
-                        }
-                        return context.dataset.label + ': ' + context.formattedValue;
-                    }
-                }
-            }
-        };
-
-        functionChart.update();
+        // สร้างกราฟหลังจากได้ข้อมูลทั้งหมด
+        createGraph(funcString, minX, maxX, minY, maxY, iterationPoints);
 
         if (Math.abs(fMid) < tolerance) {
             finalResultDiv.textContent = `คำตอบโดยประมาณคือ ${mid.toFixed(6)} (หลังจาก ${iteration + 1} รอบ)`;
@@ -176,4 +107,84 @@ document.addEventListener('DOMContentLoaded', () => {
             finalResultDiv.textContent = `ไม่พบคำตอบที่อยู่ในเกณฑ์ความคลาดเคลื่อนภายใน ${maxIterations} รอบ. คำตอบที่ใกล้เคียงที่สุดคือ ${mid.toFixed(6)}`;
         }
     });
+
+    // ปรับปรุงฟังก์ชัน createGraph ให้รับค่า min/max จากการคำนวณ
+    function createGraph(funcString, minX, maxX, minY, maxY, iterationPoints) {
+        const ctx = document.getElementById('functionChart').getContext('2d');
+        const dataPoints = [];
+        const numPoints = 100;
+        const step = (maxX - minX) / numPoints;
+
+        for (let i = 0; i <= numPoints; i++) {
+            const x = minX + i * step;
+            const y = evaluateFunction(funcString, x);
+            dataPoints.push({ x: x, y: y });
+        }
+
+        if (functionChart) {
+            functionChart.destroy();
+        }
+
+        functionChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [
+                    {
+                        label: `f(x) = ${funcString}`,
+                        data: dataPoints,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1,
+                        fill: false,
+                        pointRadius: 0
+                    },
+                    {
+                        label: 'จุด Iteration',
+                        data: iterationPoints,
+                        backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        showLine: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: {
+                            display: true,
+                            text: 'x'
+                        },
+                        min: minX,
+                        max: maxX
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'f(x)'
+                        },
+                        min: minY,
+                        max: maxY
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const point = context.raw;
+                                if (point.iteration) {
+                                    return `Iteration: ${point.iteration}, f(x) = ${point.y.toFixed(6)}`;
+                                }
+                                return context.dataset.label + ': ' + context.formattedValue;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
 });
