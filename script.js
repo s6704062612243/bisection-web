@@ -22,11 +22,21 @@ document.getElementById("bisectionForm").addEventListener("submit", function(e) 
   }
 
   let mid, fmid;
+
+  // เตรียมข้อมูลสำหรับกราฟ
+  let labels = [];
+  let mids = [];
+  let fvals = [];
+
   for (let i = 1; i <= maxIter; i++) {
     mid = (a + b) / 2;
     fmid = evaluateEquation(equation, mid);
 
     result += `<p>รอบ ${i}: mid = ${mid.toFixed(6)}, f(mid) = ${fmid.toFixed(6)}</p>`;
+
+    labels.push("รอบ " + i);
+    mids.push(mid);
+    fvals.push(fmid);
 
     if (Math.abs(fmid) < tol) {
       result += `<p><b>คำตอบประมาณ = ${mid.toFixed(6)}</b></p>`;
@@ -47,8 +57,52 @@ document.getElementById("bisectionForm").addEventListener("submit", function(e) 
   }
 
   document.getElementById("result").innerHTML = result;
+
+  // วาดกราฟ
+  const ctx = document.getElementById("bisectionChart").getContext("2d");
+
+  // ลบกราฟเก่า (ถ้ามี)
+  if (window.bisectionChart) {
+    window.bisectionChart.destroy();
+  }
+
+  window.bisectionChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: "ค่า mid",
+          data: mids,
+          borderColor: "blue",
+          fill: false,
+          yAxisID: 'y',
+        },
+        {
+          label: "ค่า f(mid)",
+          data: fvals,
+          borderColor: "red",
+          fill: false,
+          yAxisID: 'y1',
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: "index", intersect: false },
+      scales: {
+        y: {
+          type: 'linear',
+          position: 'left',
+          title: { display: true, text: 'mid' }
+        },
+        y1: {
+          type: 'linear',
+          position: 'right',
+          title: { display: true, text: 'f(mid)' },
+          grid: { drawOnChartArea: false }
+        }
+      }
+    }
+  });
 });
-
-
-
-
