@@ -26,7 +26,7 @@ document.getElementById("bisectionForm").addEventListener("submit", function(e) 
     mid = (a + b) / 2;
     fmid = evaluateEquation(equation, mid);
 
-    result += `<p>รอบ ${i}: mid = ${mid.toFixed(6)}, f(mid) = ${fmid.toExponential(4)}</p>`;
+    result += `<p>รอบ ${i}: mid = ${mid.toFixed(6)}, f(mid) = ${fmid.toFixed(6)}</p>`;
 
     if (Math.abs(fmid) < tol) {
       result += `<p><b>คำตอบประมาณ = ${mid.toFixed(6)}</b></p>`;
@@ -48,4 +48,5 @@ document.getElementById("bisectionForm").addEventListener("submit", function(e) 
 
   document.getElementById("result").innerHTML = result;
 });
+
 
