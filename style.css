@@ -128,5 +128,5 @@ tr:nth-child(even) {
 
 .chart-container {
     width: 100%;
-    height: 400px; /* กำหนดความสูงของกราฟ */
+    height: 400px;
 }
